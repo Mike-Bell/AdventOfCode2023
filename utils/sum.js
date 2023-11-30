@@ -1,0 +1,1 @@
+module.exports = arr => arr.reduce((acc, curr) => acc + curr, 0);
