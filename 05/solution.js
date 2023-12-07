@@ -86,7 +86,7 @@ const runPart2 = input => {
          if (rangeN === range.start) {
             nextRanges.push(range);
          } else if (rangeN < range.end) {
-            nextRanges.push({start: rangeN + 1, end: range.end});
+            nextRanges.push({start: rangeN, end: range.end});
          }
       }
       ranges = nextRanges;
