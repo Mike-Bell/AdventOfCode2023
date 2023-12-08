@@ -25,20 +25,18 @@ const runPart1 = input => {
 
 const runPart2 = input => {
    const {instructions, nodes} = input;
-   const curNodes = Object.keys(nodes).filter(key => key[2] === 'A');
-   const totalSteps = [];
-   for (let n = 0; n < curNodes.length; n++) {
-      let node = curNodes[n];
-      for (let i = 0; i < Infinity; i++) {
-         node = nodes[node][instructions[i % instructions.length]];
-         if (node[2] === 'Z') {
-            totalSteps[n] = i + 1;
-            break;
+   return Object.keys(nodes)
+      .filter(key => key[2] === 'A')
+      .map(node => {
+         for (let i = 0; i < Infinity; i++) {
+            node = nodes[node][instructions[i % instructions.length]];
+            if (node[2] === 'Z') {
+               return i + 1;
+            }
          }
-      }
-   }
-
-   return totalSteps.reduce((acc, curr) => lcm(acc, curr));
+         return -1;
+      })
+      .reduce((acc, curr) => lcm(acc, curr));
 };
 
 module.exports = {parseInput, runPart1, runPart2};
