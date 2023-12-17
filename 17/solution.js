@@ -1,5 +1,3 @@
-const range = require('../utils/range');
-
 const parseInput = input => input.split('\r\n').map(row => row.split('').map(Number));
 
 const runPart1 = input => {
@@ -26,11 +24,16 @@ const runPart1 = input => {
       return 0;
    };
 
-   const visited = input
-      .map(row => row
-         .map(() => range(4)
-            .map(() => range(3)
-               .map(() => false))));
+   const visited = Array(maxR + 1);
+   for (let r = 0; r <= maxR; r++) {
+      visited[r] = Array(maxC + 1);
+      for (let c = 0; c <= maxC; c++) {
+         visited[r][c] = Array(4);
+         for (let d = 0; d < 4; d++) {
+            visited[r][c][d] = [];
+         }
+      }
+   }
 
    const statesForHeats = [[[0, 0, 1, 0]]];
    for (let h = 0; h < Infinity; h++) {
@@ -39,7 +42,8 @@ const runPart1 = input => {
          continue;
       }
 
-      for (const [r, c, dir, moved] of states) {
+      while (states.length > 0) {
+         const [r, c, dir, moved] = states.pop();
          if (visited[r][c][dir][moved]) {
             continue;
          }
@@ -100,11 +104,16 @@ const runPart2 = input => {
       return 0;
    };
 
-   const visited = input
-      .map(row => row
-         .map(() => range(4)
-            .map(() => range(3)
-               .map(() => false))));
+   const visited = Array(maxR + 1);
+   for (let r = 0; r <= maxR; r++) {
+      visited[r] = Array(maxC + 1);
+      for (let c = 0; c <= maxC; c++) {
+         visited[r][c] = Array(4);
+         for (let d = 0; d < 4; d++) {
+            visited[r][c][d] = [];
+         }
+      }
+   }
 
    const statesForHeats = [[[0, 0, 1, 0]]];
    for (let h = 0; h < Infinity; h++) {
@@ -113,7 +122,8 @@ const runPart2 = input => {
          continue;
       }
 
-      for (const [r, c, dir, moved] of states) {
+      while (states.length > 0) {
+         const [r, c, dir, moved] = states.pop();
          if (visited[r][c][dir][moved]) {
             continue;
          }
@@ -121,10 +131,7 @@ const runPart2 = input => {
          visited[r][c][dir][moved] = true;
 
          if (r === maxR && c === maxC) {
-            if (moved >= 4) {
-               return h;
-            }
-            continue;
+            return h;
          }
 
          if (moved < 10) {
@@ -137,17 +144,31 @@ const runPart2 = input => {
             }
          }
 
-         if (moved >= 4) {
-            const nextDirs = turns[dir];
-            for (const nextDir of nextDirs) {
-               const nextR = r + nextDr(nextDir);
-               const nextC = c + nextDc(nextDir);
-               if (nextR >= 0 && nextC >= 0 && nextR <= maxR && nextC <= maxC) {
-                  const nextHeat = h + input[nextR][nextC];
-                  statesForHeats[nextHeat] = statesForHeats[nextHeat] || [];
-                  statesForHeats[nextHeat].push([nextR, nextC, nextDir, 1]);
+         const nextDirs = turns[dir];
+         for (const nextDir of nextDirs) {
+            const dr = nextDr(nextDir);
+            const dc = nextDc(nextDir);
+            let shouldMove = true;
+            let nextR = r;
+            let nextC = c;
+            let nextHeat = h;
+            for (let i = 0; i < 4; i++) {
+               nextR += dr;
+               nextC += dc;
+               if (nextR >= 0 && nextC >= 0 && nextR <= maxR && nextC <= maxC && !visited[nextR][nextC][nextDir][i]) {
+                  visited[nextR][nextC][nextDir][i] = true;
+                  nextHeat += input[nextR][nextC];
+               } else {
+                  shouldMove = false;
+                  break;
                }
             }
+            if (!shouldMove) {
+               continue;
+            }
+
+            statesForHeats[nextHeat] = statesForHeats[nextHeat] || [];
+            statesForHeats[nextHeat].push([nextR, nextC, nextDir, 4]);
          }
       }
    }
