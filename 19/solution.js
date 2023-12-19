@@ -39,16 +39,14 @@ const parseInput = input => {
 const runPart1 = input => {
    const {ruleSets, parts} = input;
 
-   let sum = 0;
-   for (const part of parts) {
+   return parts.map(part => {
       let ruleKey = 'in';
       // eslint-disable-next-line no-constant-condition
       while (true) {
          if (ruleKey === 'R') {
-            break;
+            return 0;
          } else if (ruleKey === 'A') {
-            sum += part.x + part.m + part.a + part.s;
-            break;
+            return Object.values(part).reduce((acc, curr) => acc + curr);
          }
 
          const ruleSet = ruleSets[ruleKey];
@@ -69,22 +67,27 @@ const runPart1 = input => {
             }
          }
       }
-   }
-
-   return sum;
+   }).reduce((acc, curr) => acc + curr);
 };
+
+const valKeys = ['x', 'm', 's', 'a'];
 
 const runPart2 = input => {
    const {ruleSets} = input;
 
-   const states = [{x: [1, 4000], m: [1, 4000], s: [1, 4000], a: [1, 4000], ruleKey: 'in'}];
-   const cloneState = state => ({
-      x: [state.x[0], state.x[1]],
-      m: [state.m[0], state.m[1]],
-      s: [state.s[0], state.s[1]],
-      a: [state.a[0], state.a[1]],
-      ruleKey: state.ruleKey
-   });
+   const states = [
+      Object.assign(
+         {ruleKey: 'in'},
+         Object.fromEntries(valKeys.map(key => [key, [1, 4000]]))
+      )
+   ];
+   const cloneState = state => {
+      const newState = {ruleKey: state.ruleKey};
+      valKeys.forEach(key => {
+         newState[key] = [...state[key]];
+      });
+      return newState;
+   };
 
    let sum = 0;
    while (states.length > 0) {
@@ -92,7 +95,9 @@ const runPart2 = input => {
       if (state.ruleKey === 'R') {
          continue;
       } else if (state.ruleKey === 'A') {
-         sum += (state.x[1] - state.x[0] + 1) * (state.m[1] - state.m[0] + 1) * (state.s[1] - state.s[0] + 1) * (state.a[1] - state.a[0] + 1);
+         sum += valKeys
+            .map(key => state[key][1] - state[key][0] + 1)
+            .reduce((acc, curr) => acc * curr, 1);
          continue;
       }
 
