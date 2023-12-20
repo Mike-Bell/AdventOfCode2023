@@ -1,3 +1,5 @@
+const lcm = require('../utils/lcm');
+
 const parseInput = input => {
    const splitLines = input.split('\r\n').map(row => row.split(' -> '));
    const nodes = {};
@@ -83,7 +85,8 @@ const runPart1 = input => {
 };
 
 const runPart2 = input => {
-   for (const [nodeName, node] of Object.entries(input)) {
+   const inputEntries = Object.entries(input);
+   for (const [nodeName, node] of inputEntries) {
       if (node.type === '%') {
          node.state = false;
       }
@@ -99,16 +102,33 @@ const runPart2 = input => {
       }
    }
 
-   for (let i = 1; i < 1000; i++) {
+   let targetNames = ['rx'];
+   while (targetNames.length === 1) {
+      const nextTargets = [];
+      for (const targetName of targetNames) {
+         for (const [nodeName, node] of inputEntries) {
+            if (node.dest.includes(targetName)) {
+               nextTargets.push(nodeName);
+            }
+         }
+      }
+      targetNames = nextTargets;
+   }
+
+   const targetCycles = Array(Object.keys(targetNames).length).fill(0);
+
+   let i = 0;
+   let shouldContinue = true;
+   while (shouldContinue) {
+      i++;
       let states = [[false, 'broadcaster', 'button']];
-      let lows = 0;
       while (states.length > 0) {
          const nextStates = [];
          for (const [signal, nodeName, sourceName] of states) {
-            if (nodeName === 'rx') {
-               if (!signal) {
-                  lows++;
-               }
+            if (signal && targetNames.includes(sourceName)) {
+               const ind = targetNames.indexOf(sourceName);
+               targetCycles[ind] = targetCycles[ind] || i;
+               shouldContinue = targetCycles.some(c => c === 0);
             }
 
             const node = input[nodeName];
@@ -135,13 +155,10 @@ const runPart2 = input => {
             }
          }
          states = nextStates;
-         if (lows === 1) {
-            return i;
-         }
       }
    }
 
-   return -1;
+   return targetCycles.reduce((acc, curr) => lcm(acc, curr));
 };
 
 module.exports = {parseInput, runPart1, runPart2};
