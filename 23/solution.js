@@ -89,7 +89,7 @@ const runPart2 = input => {
    const start = [0, 1, -1, -1, 0, 0];
 
    const nodes = [[0, 1], [maxR, maxC - 1]];
-   const edges = [];
+   const edges = [[], []];
 
    const traveled = input.map(row => row.map(() => false));
 
@@ -166,29 +166,50 @@ const runPart2 = input => {
       states = nextStates;
    }
 
-   states = [[[], 0, 0]];
-   let max = 0;
-   while (states.length > 0) {
-      const state = states.pop();
-      const seen = state[0];
-      const curNode = state[1];
-      const distance = state[2];
-      seen[curNode] = true;
-      if (curNode === 1) {
-         if (distance > max) {
-            max = distance;
+   let target = 1;
+   let distanceToTrueTarget = 0;
+   // eslint-disable-next-line no-constant-condition
+   while (true) {
+      const edgesPointingAtTarget = [];
+      for (let e = 0; e < edges.length; e++) {
+         const edgeSet = edges[e];
+         for (const edge of edgeSet) {
+            if (edge[0] === target) {
+               edgesPointingAtTarget.push([e, edge[1]]);
+            }
          }
-         continue;
       }
-      for (const edge of edges[curNode]) {
-         const nextNode = edge[0];
-         if (!seen[nextNode]) {
-            states.push([seen.slice(0), nextNode, distance + edge[1]]);
-         }
+      if (edgesPointingAtTarget.length === 1) {
+         target = edgesPointingAtTarget[0][0];
+         distanceToTrueTarget += edgesPointingAtTarget[0][1];
+      } else {
+         break;
       }
    }
 
-   return max;
+   let max = 0;
+   const seen = new Array(nodes.length).fill(false);
+   const search = (curNode, distance) => {
+      if (curNode === target) {
+         if (distance > max) {
+            max = distance;
+         }
+         return;
+      }
+
+      seen[curNode] = true;
+      const edgeSet = edges[curNode];
+      for (const edge of edgeSet) {
+         const nextNode = edge[0];
+         if (!seen[nextNode]) {
+            search(nextNode, distance + edge[1]);
+         }
+      }
+      seen[curNode] = false;
+   };
+   search(0, 0);
+
+   return max + distanceToTrueTarget;
 };
 
 module.exports = {parseInput, runPart1, runPart2};
