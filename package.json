@@ -7,7 +7,9 @@
     "scaffold": "node scaffold.js"
   },
   "eslintConfig": {
-    "extends": ["techsmith/es6"],
+    "extends": [
+      "techsmith/es6"
+    ],
     "rules": {
       "no-console": "off",
       "no-magic-numbers": "off"
@@ -20,5 +22,8 @@
   "devDependencies": {
     "eslint-config-techsmith": "^3.1.0",
     "jest": "^24.9.0"
+  },
+  "dependencies": {
+    "z3-solver": "^4.12.4"
   }
 }
